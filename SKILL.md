@@ -9,6 +9,13 @@ Shipcheck is a project delivery check system for Vibe Coding work. It is not a c
 
 Public-facing Chinese name: `交付体检`.
 
+Core behavior:
+
+- Record after every meaningful action.
+- Audit before every phase transition.
+- Remind the user when required actions are still incomplete.
+- Treat `project-delivery/` as the source of truth.
+
 ## Operating Modes
 
 ### 0. Choose Runtime
@@ -58,10 +65,24 @@ python3 /Users/huzoukai/.codex/skills/shipcheck/scripts/record_delivery_event.py
 
 Use:
 
+- `--type progress` for normal project progress, task completion, user feedback, phase work, or non-code delivery movement.
 - `--type change` for code/file changes.
 - `--type version` for commits, releases, deploys, or milestone submissions.
 - `--type checkpoint` for every 10 or 20 rounds of conversation/work.
 - `--type decision` for architecture, scope, or delivery decisions.
+
+Record after every meaningful action, including small actions. Examples:
+
+- a page or component was adjusted,
+- an API was created or changed,
+- a database field/table was changed,
+- a test pass was run,
+- a client gave feedback,
+- a bug was fixed,
+- a Git commit/version/deploy happened,
+- a phase document was updated.
+
+If the action does not fit code/version/decision/checkpoint, use `--type progress`.
 
 If Git is available, include branch/commit/version fields:
 
@@ -78,6 +99,8 @@ python3 /Users/huzoukai/.codex/skills/shipcheck/scripts/check_delivery_stage.py 
 ```
 
 Base the answer on the files in `project-delivery/`, not memory or assumptions. If files are missing, treat that as a delivery gap.
+
+Always audit before moving to a new phase. When the user says "下一步", "继续", "进入下一阶段", "可以了", or similar, do not silently advance. First run the audit. If the audit returns NO-GO, stop and tell the user which required actions are incomplete.
 
 ### 5. Update a Phase
 
@@ -106,6 +129,14 @@ Use strict gates by default:
 - 客户验收未通过，不进入上线。
 - 上线没有记录，不进入复盘。
 - 复盘没有沉淀，不算交付完成。
+
+Phase-transition reminder rules:
+
+- Before changing the current phase, run `check_delivery_stage.py`.
+- If the result is NO-GO, explicitly say the phase cannot move forward yet.
+- Name the missing files, missing sections, missing tests, missing Git/version records, or missing GO decision.
+- Give the user the next 3 concrete actions needed to unlock the phase.
+- Do not continue implementation under the next phase label until the missing actions are recorded or the user explicitly overrides the gate.
 
 Git/version rules:
 
@@ -204,3 +235,5 @@ Use `assets/project-delivery-template/` as the canonical template source.
 5. record go/no-go.
 
 If the user asks for a handoff-ready status, include the latest stage summary plus the latest process-monitoring entries so another person can continue immediately.
+
+After completing any requested task under this skill, check whether a log entry should be appended. If the user did not ask to skip logging, write or provide the log entry before finishing the response.

@@ -10,6 +10,7 @@ from pathlib import Path
 
 
 EVENT_TARGETS = {
+    "progress": "progress-log.md",
     "change": "change-log.md",
     "version": "change-log.md",
     "decision": "change-log.md",
