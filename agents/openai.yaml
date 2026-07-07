@@ -1,6 +1,0 @@
-interface:
-  display_name: "Shipcheck"
-  short_description: "Check Vibe Coding projects from idea to delivery"
-  default_prompt: "Use $shipcheck to initialize and audit my project delivery flow."
-policy:
-  allow_implicit_invocation: true
